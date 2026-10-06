@@ -1,45 +1,54 @@
 ```sh
-docker compose up -d --wait
+docker compose up -d --wait pact-broker
 mvn clean verify
 ```
 
 ```sh
-java -jar rate-provider/target/rate-provider-1.0.0.jar --server.port=8094
+./release.sh dev v1
+./release.sh prod v1
 ```
 
 ```sh
-java -jar rate-provider/target/rate-provider-1.0.0.jar --server.port=8095
+./run.sh dev v1
+./run.sh prod v1
 ```
 
 ```sh
-java -jar rate-printer/target/rate-printer-1.0.0.jar
-```
-
-```sh
-open http://localhost:23000/d/homework-sw
-curl -u admin:homework http://localhost:23000/api/health
-open http://localhost:29090/targets
+open http://localhost:18300/d/homework-sw
+open http://localhost:28300/d/homework-sw
+curl -u admin:homework http://localhost:18300/api/health
+open http://localhost:18090/targets
+open http://localhost:28090/targets
 open http://localhost:29292
 ```
 
 ```sh
-curl http://localhost:8094/rpc -H 'Content-Type: application/json' -H 'X-Client-Id: manual' -d '{"jsonrpc":"2.0","method":"getRate","id":1}'
-curl http://localhost:8094/actuator/prometheus
-curl http://localhost:8095/actuator/prometheus
-curl http://localhost:8096/actuator/prometheus
-curl http://localhost:8094/actuator/info
+curl http://localhost:18094/rpc -H 'Content-Type: application/json' -H 'X-Client-Id: manual' -d '{"jsonrpc":"2.0","method":"getRate","id":1}'
+curl http://localhost:28094/rpc -H 'Content-Type: application/json' -H 'X-Client-Id: manual' -d '{"jsonrpc":"2.0","method":"getRate","id":1}'
+curl http://localhost:18094/actuator/prometheus
+curl http://localhost:18095/actuator/prometheus
+curl http://localhost:18096/actuator/prometheus
 ```
 
 ```sh
-docker compose exec zookeeper zkCli.sh ls /services/currency
+docker logs -f homework-sw-dev-client-1
 ```
 
 ```sh
-mvn -pl rate-printer clean verify
-mvn -pl rate-provider clean verify
+docker logs -f homework-sw-prod-service1-1
 ```
 
 ```sh
-./stop.sh
-docker compose stop
+./stop.sh dev
+./stop.sh prod
+```
+
+```sh
+mvn clean verify
+./release.sh dev v2
+./run.sh dev v2
+```
+
+```sh
+./run.sh dev v1
 ```
