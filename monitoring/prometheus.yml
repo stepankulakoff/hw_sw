@@ -1,0 +1,18 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+scrape_configs:
+  - job_name: spring
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ['host.docker.internal:8094']
+        labels: {service: service1}
+      - targets: ['host.docker.internal:8095']
+        labels: {service: service2}
+      - targets: ['host.docker.internal:8096']
+        labels: {service: client}
+  - job_name: zookeeper
+    static_configs:
+      - targets: ['zookeeper:7070']
+        labels: {service: zookeeper}

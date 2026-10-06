@@ -1,6 +1,21 @@
 name: homework-sw-pact
 
 services:
+  zookeeper:
+    image: zookeeper:3.9.5
+    ports: ["127.0.0.1:52181:2181"]
+    environment:
+      ZOO_HEAP_SIZE: "128"
+      ZOO_CFG_EXTRA: >-
+        metricsProvider.className=org.apache.zookeeper.metrics.prometheus.PrometheusMetricsProvider
+        metricsProvider.httpPort=7070
+        metricsProvider.exportJvmInfo=true
+    healthcheck:
+      test: ["CMD", "zkServer.sh", "status"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
   postgres:
     image: postgres:16-alpine
     environment:
@@ -37,5 +52,38 @@ services:
       timeout: 5s
       retries: 30
 
+  prometheus:
+    image: prom/prometheus:v3.5.5
+    ports: ["127.0.0.1:29090:9090"]
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:9090/-/ready"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  grafana:
+    image: grafana/grafana:13.2.2
+    ports: ["127.0.0.1:23000:3000"]
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: homework
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      prometheus: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:3000/api/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
 volumes:
+  prometheus-data:
+  grafana-data:
   pact-data:
