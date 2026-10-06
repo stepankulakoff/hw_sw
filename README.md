@@ -8,7 +8,8 @@ docker exec homework-sw-zookeeper zkServer.sh status
 ```
 
 ```sh
-mvn clean package
+docker compose up -d --wait
+mvn clean verify
 ```
 
 ```sh
@@ -33,4 +34,17 @@ curl http://localhost:8091/rpc -H 'Content-Type: application/json' -d '{"jsonrpc
 
 ```sh
 docker stop homework-sw-zookeeper
+```
+
+```sh
+open http://localhost:29292
+```
+
+```sh
+mvn -pl rate-printer clean verify
+mvn -pl rate-provider clean verify
+```
+
+```sh
+docker compose stop
 ```
